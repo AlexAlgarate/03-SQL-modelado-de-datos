@@ -2,7 +2,17 @@ create schema if not exists academia_fjmm;
 
 set schema 'academia_fjmm';
 
-
+DO $$ DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'academia_fjmm'
+    ) LOOP
+        EXECUTE 'DROP TABLE IF EXISTS academia_fjmm.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
 
 -- Inicio la inserción de datos en una tabla auxiliar:
 CREATE TABLE if not exists tmp_academia (
@@ -2156,6 +2166,12 @@ from tmp_academia ta
 inner join provincia p on ta.provincia = p.valor 
 order by ta.poblacion;
 
+-- Sacar los valores únicos de población y provincia
+select distinct  p.valor "Población", pr.valor "Provincia"
+from poblacion p 
+inner join provincia pr 
+on p.id_provincia = pr.id
+;
 
 /*
 select distinct ta.poblacion, ta.provincia
@@ -2179,4 +2195,52 @@ inner join tmp_academia ta on ta.poblacion = p.valor and ta.provincia = pr.valor
 ;
 
 select * from contacto inner join direccion_postal on contacto.dni = direccion_postal.dni;
+
+
+-- matrícula y profesor lo haremos con LEFT y RIGHT JOIN
+
+-- MATRÍCULA
+
+-- Ejemplo de crear valor único con add constraint
+--alter table matricula add constraint unique_alumno_edicion unique(dni_alumno, id_edicion);
+-- Valor único con create unique index
+
+create unique index unique_alumno_edicion on matricula (lower(dni_alumno), id_edicion);
+
+insert into matricula(dni_alumno,fecha_matricula, id_edicion)
+select distinct ta.dni, ta.fecha_matriculacion::date,  ed.id
+from tmp_academia ta
+inner join curso cu on ta.curso = cu.nombre
+inner join edicion ed on cu.id = ed.id_curso and ed.numero = ta.edicion
+where ta.edicion is not null;
+
+
+-- PROFESOR
+
+create unique index unique_profesor_edicion on profesor (dni_profesor, id_asignatura, id_edicion);
+
+insert into profesor (dni_profesor, id_asignatura, id_edicion)
+select distinct ta.dni, asi.id,  ed.id
+from tmp_academia ta
+inner join curso cu on ta.curso = cu.nombre
+inner join asignatura asi on asi.nombre = ta.asignatura
+inner join edicion ed on cu.id = ed.id_curso
+where ta.fecha_matriculacion = '';
+
+
+-- TELEFONO 
+insert into telefono (dni, valor)
+select distinct dni, telefono from tmp_academia ta;
+
+
+-- email 
+insert into email (dni, valor)
+select distinct dni, email from tmp_academia ta;
+
+
+
+
+
+
+
 
