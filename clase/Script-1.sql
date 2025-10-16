@@ -2237,6 +2237,73 @@ select distinct dni, telefono from tmp_academia ta;
 insert into email (dni, valor)
 select distinct dni, email from tmp_academia ta;
 
+-- NOTAS
+
+alter table nota add constraint unique_nota_alumno unique (dni_alumno, id_asignatura);
+
+insert into nota (dni_alumno, valor, id_asignatura)
+select distinct ta.dni, ta.nota, a.id  
+from tmp_academia ta
+inner join asignatura a on a.nombre = ta.asignatura
+where ta.nota is not null
+;
+
+-- ya no necesitamos más la tabla temporal
+--drop table tmp_academia;
+
+-- Ahora no tenemos la información de cuántos alumnos hay
+select * from matricula m ;
+
+
+
+-- Quiero sacar todos los contactos y saber cuáles son alumnos
+select * from contacto c
+left join matricula m on c.dni = m.dni_alumno ;
+
+-- Y ahora saber cuáles son profesores
+select * from contacto c 
+left join matricula m on c.dni = m.dni_alumno 
+where m.id is null;
+
+-- ¿Cómo podemos saber si todos los alumnos han acabado el curso? 
+-- Por ejemplo, sabiendo si tienen nota en todas las asignaturas. Y queremos saber los que NO lo han acabado.
+
+select m.dni_alumno, p.id_edicion, a.nombre, n.valor from profesor p
+inner join asignatura a on a.id = p.id_asignatura 
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.id_asignatura = a.id and m.dni_alumno = n.dni_alumno 
+where n.id is null
+;
+
+-- Y ahora agrupamos para saber cuántas asignaturas le faltan para terminar
+-- en el select no se pueden agregar más columnas que las del group by,
+-- pero sí se pueden poner funciones, como en este caso el count()
+select m.dni_alumno, p.id_edicion, count(*) "Número de asignaturas pendientes" from profesor p
+inner join asignatura a on a.id = p.id_asignatura 
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.id_asignatura = a.id and m.dni_alumno = n.dni_alumno 
+where n.id is null
+group by m.dni_alumno, p.id_edicion
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
