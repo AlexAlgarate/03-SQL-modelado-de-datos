@@ -2062,7 +2062,7 @@ alter table email add constraint contacto_email_fk foreign key (dni) references 
 alter table nota add constraint contacto_nota_fk foreign key (dni_alumno) references contacto(dni) on delete cascade;
 alter table nota add constraint asignatura_nota_fk foreign key (id_asignatura) references asignatura(id);
 
-alter table profesor add constraint contacto_profesor_fk foreign key (dni_profesor) references contacto(dni) on delete cascade;
+alter table profesor add constraint contacto_profesor_fk foreign key (dni_profesor) references contacto(dni);
 alter table profesor add constraint edicion_profesor_fk foreign key (id_edicion) references edicion(id);
 alter table profesor add constraint asignatura_profesor_fk foreign key (id_asignatura) references asignatura(id);
 
@@ -2104,7 +2104,7 @@ select distinct asignatura from tmp_academia;
 -- agregar cursos desde la tabla temporal
 create unique index unique_nombre_curso on curso (lower(nombre));
 insert into curso (nombre)
-select curso from tmp_academia ta  group by curso;
+select curso from tmp_academia  group by curso;
 
 -- sacar los cursos que tengan la palabra stack '%palabra'
 
