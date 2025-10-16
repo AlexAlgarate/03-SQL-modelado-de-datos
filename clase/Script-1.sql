@@ -2015,14 +2015,14 @@ id_poblacion int not null
 create table if not exists poblacion 
 (
 id smallserial primary key,
-valor varchar(25) not null,
+valor varchar(50) not null,
 id_provincia smallint not null 
 );
 
 create table if not exists provincia
 (
 id smallserial primary key,
-valor varchar(25) not null
+valor varchar(50) not null
 );
 
 create table if not exists profesor(
@@ -2104,37 +2104,37 @@ select distinct asignatura from tmp_academia;
 -- agregar cursos desde la tabla temporal
 create unique index unique_nombre_curso on curso (lower(nombre));
 insert into curso (nombre)
-select curso from tmp_academia  group by curso;
+select curso from tmp_academia group by curso;
 
--- sacar los cursos que tengan la palabra stack '%palabra'
-
+-- Búsquedas de algo concreto con LIKE '%palabra'
 --select * from tmp_academia ta where curso like '%Stack';
 
 alter table tmp_academia add column edicion smallint;
 
--- agregar ediciones, pero no vienen. Vamos a calcularla con la fecha de matriculación
-select *,case when (to_date(fecha_matriculacion, 'YYYY-MM-DD') <= to_date('2023-10-15', 'YYYY-MM-DD')) then 18 else 19 end edicion from tmp_academia where fecha_matriculacion != ''  order by fecha_matriculacion ;
+-- Vamos a agregar 'ediciones' del curso, pero no vienen en la tabla temporal. Las vamos a calcular a partir de la fecha de matriculación de la persona.
+-- select *,case when (to_date(fecha_matriculacion, 'YYYY-MM-DD') <= to_date('2023-10-15', 'YYYY-MM-DD')) then 18 else 19 end edicion from tmp_academia where fecha_matriculacion != ''  order by fecha_matriculacion ;
 
 update tmp_academia 
 set 
 	edicion = case when (to_date(fecha_matriculacion, 'YYYY-MM-DD') <= to_date('2023-10-15', 'YYYY-MM-DD')) then 18 else 19 end 
 where fecha_matriculacion != '' ;
-
-select distinct edicion from tmp_academia ;
+-- case when es como hacer un if / else
 
 create unique index unique_edicion_curso on edicion (numero, id_curso);
 
 insert into edicion (numero, id_curso)
-select distinct edicion, curso.id
-from tmp_academia inner join curso on tmp_academia.curso = curso.nombre 
+select distinct ta.edicion, c.id
+from tmp_academia ta inner join curso c on ta.curso = c.nombre 
 where edicion is not null;
 
-select e.numero, e.id_curso, c.id, c.nombre from edicion e inner join curso c on e.id_curso = c.id;
-
+/*
+select e.numero, e.id_curso, c.id, c.nombre from edicion e 
+inner join curso c on e.id_curso = c.id;
+*/
 
 select * from tmp_academia;
 
-*/
+
 -- fecha de nacimiento dará problemas, hay que cambiarlo a fecha
 insert into contacto (dni, nombre, apellido_1, apellido_2, fecha_nacimiento)
 select distinct dni, nombre, apellido_1, apellido_2, to_date(fecha_nacimiento, 'YYYY-MM-DD') from tmp_academia ta ;
@@ -2142,23 +2142,41 @@ select distinct dni, nombre, apellido_1, apellido_2, to_date(fecha_nacimiento, '
 -- población y provincia
 
 insert into provincia (valor)
-select distinct provincia from tmp_academia ta order by provincia;
+select distinct provincia from tmp_academia order by provincia;
 
+/*
 alter table poblacion drop column valor;
 alter table poblacion add column valor varchar(50) not null;
+create unique index unique_valor_poblacion on poblacion (lower(valor), id_provincia);
+*/
 
 insert into poblacion (valor, id_provincia)
 select distinct ta.poblacion, p.id
-from tmp_academia ta 
-inner join provincia p on ta.provincia = p.valor
+from tmp_academia ta
+inner join provincia p on ta.provincia = p.valor 
 order by ta.poblacion;
 
 
-select * from codigo_postal;
+/*
+select distinct ta.poblacion, ta.provincia
+from tmp_academia ta
+order by ta.poblacion;
+*/
+
+-- select * from codigo_postal;
 
 create unique index unique_codigo_postal_poblacion on codigo_postal (valor, id_poblacion);
-insert into codigo_postal (valor, id_poblacion)
+
+insert into codigo_postal (valor, id_poblacion )
 select id, id from poblacion;
 
 
+insert into direccion_postal (dni, calle, id_codigo_postal, numero, piso)
+select distinct ta.dni, ta.calle, cp.id codigo_postal, cast(split_part(ta.piso, ' ', 1) as int) numero, split_part(ta.piso, ' ', 2) piso from codigo_postal cp 
+inner join poblacion p on p.id = cp.id_poblacion
+inner join provincia pr on pr.id = p.id_provincia
+inner join tmp_academia ta on ta.poblacion = p.valor and ta.provincia = pr.valor
+;
+
+select * from contacto inner join direccion_postal on contacto.dni = direccion_postal.dni;
 
