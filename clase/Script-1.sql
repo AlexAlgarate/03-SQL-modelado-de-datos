@@ -2286,6 +2286,51 @@ where n.id is null
 group by m.dni_alumno, p.id_edicion
 ;
 
+-- Y ahora quiero saber a cuántos le quedan más de una asignatura
+-- HAVING se usa para filtrar pero después de la agrupación group by
+select m.dni_alumno, p.id_edicion, count(*) "Número de asignaturas pendientes" from profesor p
+inner join asignatura a on a.id = p.id_asignatura 
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.id_asignatura = a.id and m.dni_alumno = n.dni_alumno 
+where n.id is null
+group by m.dni_alumno, p.id_edicion
+having count(*) > 1
+;
+
+-- Ahora sacamos las que no se ha examinado o ha suspendido.
+select m.dni_alumno, p.id_edicion, count(*) "Número de asignaturas pendientes" from profesor p
+inner join asignatura a on a.id = p.id_asignatura 
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.id_asignatura = a.id and m.dni_alumno = n.dni_alumno 
+where n.id is null or n.valor < 5
+group by m.dni_alumno, p.id_edicion
+having count(*) > 1
+;
+
+-- Vamos a añadir los datos del contacto y dirección, pero usando subconsultas
+select * from (select m.dni_alumno, p.id_edicion, count(*) numero_asignaturas from profesor p
+inner join asignatura a on a.id = p.id_asignatura 
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.id_asignatura = a.id and m.dni_alumno = n.dni_alumno 
+where n.id is null or n.valor < 5
+group by m.dni_alumno, p.id_edicion
+having count(*) > 1
+) ap
+inner join contacto c on c.dni = ap.dni_alumno
+inner join direccion_postal dp on dp.dni = c.dni 
+;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
