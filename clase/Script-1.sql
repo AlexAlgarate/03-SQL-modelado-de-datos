@@ -2321,38 +2321,98 @@ inner join direccion_postal dp on dp.dni = c.dni
 ;
 
 
+-- Vamos a sacar la nota media por asignatura entre todos los alumnos para esa asignatura.
+-- Después, vamos a sacar:
+-- a) Los alumnos que están por encima de la media en cada asignatura
+-- b) El profesor cuya asignatura sea más fácil (es decir, que tiene la nota media más alta)
+
+select id_asignatura, round(avg(valor), 2) nota_media
+from nota
+group by id_asignatura
+order by id_asignatura 
+;
+
+-- Con el nombre de la asignatura
+
+select asi.nombre , round(avg(n.valor), 2) nota_media
+from nota n
+inner join asignatura asi on asi.id = n.id_asignatura 
+group by asi.nombre
+order by asi.nombre 
+;
+
+-- a) Los alumnos que están por encima de la media en cada asignatura
+
+select c.nombre, c.apellido_1 "Primer apellido", c.apellido_2 "Segundo apellido", n.dni_alumno, asi.nombre, n.valor "Nota del alumno", nm.nota_media from (
+	select id_asignatura, round(avg(valor), 2) nota_media
+	from nota
+	group by id_asignatura
+	order by id_asignatura 
+) nm 
+inner join nota n on n.id_asignatura = nm.id_asignatura
+inner join asignatura asi on asi.id = n.id_asignatura 
+inner join contacto c on c.dni = n.dni_alumno 
+where n.valor > nm.nota_media
+;
+
+-- B) El profesor cuya asignatura sea más fácil (es decir, que tiene la nota media más alta)
+select distinct c.nombre, c.apellido_1, c.apellido_2, p.dni_profesor, asi.nombre, nm.nota_media  from (
+	select id_asignatura, round(avg(valor), 2) nota_media
+	from nota
+	group by id_asignatura
+	order by nota_media desc
+	limit 1
+) nm 
+inner join profesor p on p.id_asignatura = nm.id_asignatura 
+inner join contacto c on c.dni = p.dni_profesor 
+inner join asignatura asi on asi.id = nm.id_asignatura 
+;
+
+-- para esta asignatura, si hay algún alumno que no ha cursado esta asignatura
+select distinct c.nombre, c.apellido_1, c.apellido_2, p.dni_profesor, asi.nombre, nm.nota_media, nm.id_asignatura   from (
+	select id_asignatura, round(avg(valor), 2) nota_media
+	from nota
+	group by id_asignatura
+	order by nota_media desc
+	limit 1
+) nm 
+inner join profesor p on p.id_asignatura = nm.id_asignatura 
+inner join contacto c on c.dni = p.dni_profesor 
+inner join asignatura asi on asi.id = nm.id_asignatura 
+;
+
+select *
+from profesor p
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.dni_alumno = m.dni_alumno and n.id_asignatura = p.id_asignatura
+where n.valor is null
+order by m.dni_alumno 
+;
+
+-- falta dejar bonita la cabecera
+select distinct * from (
+	select id_asignatura, round(avg(valor), 2) nota_media
+	from nota
+	group by id_asignatura
+	order by nota_media desc
+	limit 1
+) nm 
+inner join profesor p on p.id_asignatura  = nm.id_asignatura 
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.dni_alumno = m.dni_alumno and n.id_asignatura = p.id_asignatura
+inner join contacto c on c.dni = m.dni_alumno 
+where n.valor is null
+;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+select m.dni_alumno, p.id_edicion, count(*) "Número de asignaturas pendientes" from profesor p
+inner join asignatura a on a.id = p.id_asignatura 
+inner join matricula m on m.id_edicion = p.id_edicion
+left join nota n on n.id_asignatura = a.id and m.dni_alumno = n.dni_alumno 
+where n.id is null or n.valor < 5
+group by m.dni_alumno, p.id_edicion
+having count(*) > 1
 
 
 
