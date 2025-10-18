@@ -552,7 +552,7 @@ INSERT INTO tmp_videoclub (id_copia,fecha_alquiler_texto,dni,nombre,apellido_1,a
 	 (308,'2024-01-25','1638778M','Angel','Lorenzo','Caballero','angel.lorenzo.caballero@gmail.com','698073069','47008','2011-07-30','82','1','Izq.','Sol','1Izq.','El bazar de las sorpresas','Comedia','Alfred Kralik es el tímido jefe de vendedores de Matuschek y Compañía, una tienda de Budapest. Todas las mañanas, los empleados esperan juntos la llegada de su jefe, Hugo Matuschek. A pesar de su timidez, Alfred responde al anuncio de un periódico y mantiene un romance por carta. Su jefe decide contratar a una tal Klara Novak en contra de la opinión de Alfred. En el trabajo, Alfred discute constantemente con ella, sin sospechar que es su corresponsal secreta.','Ernst Lubitsch','2024-01-25',NULL);
 
 
-create table pelicula(
+create table if not exists pelicula(
     id_pelicula serial primary key,
     titulo varchar(150) not null,
     genero varchar(50) not null,
@@ -560,7 +560,7 @@ create table pelicula(
     sinopsis text not null
 );
 
-create table socio(
+create table if not exists socio(
     id_socio serial primary key,
     nombre varchar(50) not null,
     apellido_1 varchar(50) not null,
@@ -570,12 +570,12 @@ create table socio(
     dni varchar(20) not null
 );
 
-create table copia(
+create table if not exists copia(
     id_copia integer primary key,
     id_pelicula integer not null
 );
 
-create table direccionpostal(
+create table if not exists direccionpostal(
 	id_direccion serial primary key,
 	id_socio integer not null,
 	codigo_postal varchar(10),
@@ -584,7 +584,7 @@ create table direccionpostal(
 	piso varchar(10)
 );
 
-create table prestamo(
+create table if not exists prestamo(
     id_prestamo serial primary key,
     id_socio integer not null,
     id_copia integer not null,
