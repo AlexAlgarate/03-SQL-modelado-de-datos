@@ -575,13 +575,13 @@ create table if not exists copia(
     id_pelicula integer not null
 );
 
-create table if not exists direccionpostal(
+create table if not exists direccionPostal(
 	id_direccion serial primary key,
-	id_socio integer not null,
 	codigo_postal varchar(10),
 	calle varchar(100),
 	numero varchar(10),
-	piso varchar(10)
+	piso varchar(10),
+	id_socio integer not null
 );
 
 create table if not exists prestamo(
@@ -592,15 +592,28 @@ create table if not exists prestamo(
     fecha_devolucion date
 );
 
+alter table copia
+add constraint pelicula_copia_fk
+foreign key (id_pelicula)
+references pelicula(id_pelicula) on delete cascade;
 
+alter table direccionPostal
+add constraint socio_direccionPostal_fk
+foreign key (id_socio)
+references socio(id_socio) on delete cascade;
 
+alter table prestamo
+add constraint socio_prestamo_fk
+foreign key (id_socio)
+references socio(id_socio) on delete cascade;
 
+alter table prestamo
+add constraint copia_prestamo_fk
+foreign key (id_copia)
+references copia(id_copia) on delete cascade;
 
-
-
-
-
-
+create unique index unique_dni_socio on socio(lower(dni));
+create unique index unique_direccion_socio on direccionPostal(id_socio);
 
 
 
