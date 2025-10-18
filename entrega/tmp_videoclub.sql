@@ -2,7 +2,12 @@ create schema if not exists videoclub_aac;
 
 set schema 'videoclub_aac';
 
-drop table if exists socio;
+DROP TABLE IF EXISTS prestamo;
+DROP TABLE IF EXISTS direccionPostal;
+DROP TABLE IF EXISTS copia;
+DROP TABLE IF EXISTS socio;
+DROP TABLE IF EXISTS pelicula;
+
 
 CREATE TABLE if not exists tmp_videoclub (
 	id_copia int4 NULL,
@@ -546,25 +551,46 @@ INSERT INTO tmp_videoclub (id_copia,fecha_alquiler_texto,dni,nombre,apellido_1,a
 	 (306,'2024-01-07','6810904Y','Hugo','Torres','Ferrer','hugo.torres.ferrer@gmail.com','649016903','47006','1994-06-05','50','1','Der.','Federico García Lorca','1Der.','La doncella','Thriller','Corea, década de 1930, durante la colonización japonesa. Una joven llamada Sookee es contratada como doncella de una rica mujer japonesa, Hideko, que vive recluida en una gran mansión bajo la influencia de un tirano. Sookee guarda un secreto y con la ayuda de un estafador que se hace pasar por un conde japonés, planea algo para Hideko.','Park Chan-wook','2024-01-07','2024-01-08'),
 	 (308,'2024-01-25','1638778M','Angel','Lorenzo','Caballero','angel.lorenzo.caballero@gmail.com','698073069','47008','2011-07-30','82','1','Izq.','Sol','1Izq.','El bazar de las sorpresas','Comedia','Alfred Kralik es el tímido jefe de vendedores de Matuschek y Compañía, una tienda de Budapest. Todas las mañanas, los empleados esperan juntos la llegada de su jefe, Hugo Matuschek. A pesar de su timidez, Alfred responde al anuncio de un periódico y mantiene un romance por carta. Su jefe decide contratar a una tal Klara Novak en contra de la opinión de Alfred. En el trabajo, Alfred discute constantemente con ella, sin sospechar que es su corresponsal secreta.','Ernst Lubitsch','2024-01-25',NULL);
 
-select * from tmp_videoclub tv ;
-create table if not exists socio(
-	id_socio serial primary key,
-	nombre varchar(30) not null,
-	apellido_1 varchar(30) not null,
-	apellido_2 varchar(30) not null,
-	fecha_nacimiento date not null,
-	dni varchar(10) not null,
-	telefono smallint not null
+
+create table pelicula(
+    id_pelicula serial primary key,
+    titulo varchar(150) not null,
+    genero varchar(50) not null,
+    director varchar(100) not null,
+    sinopsis text not null
 );
-select * from socio;
--- insert into socio (nombre, apellido_1, apellido_2, dni, telefono)
-select distinct nombre, apellido_1, apellido_2, dni, telefono from tmp_videoclub tv;
 
+create table socio(
+    id_socio serial primary key,
+    nombre varchar(50) not null,
+    apellido_1 varchar(50) not null,
+    apellido_2 varchar(50),
+    fecha_nacimiento date not null,
+    telefono varchar(20) not null,
+    dni varchar(20) not null
+);
 
+create table copia(
+    id_copia integer primary key,
+    id_pelicula integer not null
+);
 
+create table direccionpostal(
+	id_direccion serial primary key,
+	id_socio integer not null,
+	codigo_postal varchar(10),
+	calle varchar(100),
+	numero varchar(10),
+	piso varchar(10)
+);
 
-
-
+create table prestamo(
+    id_prestamo serial primary key,
+    id_socio integer not null,
+    id_copia integer not null,
+    fecha_prestamo date not null,
+    fecha_devolucion date
+);
 
 
 
