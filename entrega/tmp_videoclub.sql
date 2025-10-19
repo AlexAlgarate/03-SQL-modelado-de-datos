@@ -617,12 +617,15 @@ create unique index unique_direccion_socio on direccionPostal(id_socio);
 
 create unique index unique_pelicula_director_titulo on pelicula (lower(titulo), lower(director));
 
+
+-- pelicula
 insert into pelicula (titulo, genero, director, sinopsis)
 select distinct titulo, genero, director, sinopsis
 from tmp_videoclub tv;
 
-
-
+-- socio
+insert into socio (nombre, apellido_1, apellido_2, fecha_nacimiento, telefono, dni)
+select distinct nombre, apellido_1, apellido_2, to_date(fecha_nacimiento, 'YYYY-MM-DD'), telefono, dni from tmp_videoclub;
 
 
 
