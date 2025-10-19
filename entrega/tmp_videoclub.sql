@@ -648,12 +648,13 @@ where tv.id_copia is not null;
 select * from copia;
 
 
-
-
-
-
-
-
+-- préstamo
+insert into prestamo (id_socio, id_copia, fecha_prestamo, fecha_devolucion)
+select distinct s.id_socio, tv.id_copia, tv.fecha_alquiler, tv.fecha_devolucion
+from tmp_videoclub tv
+inner join socio s on lower(s.dni) = lower(tv.dni)
+where tv.fecha_alquiler is not null and tv.id_copia is not null
+;
 
 
 
