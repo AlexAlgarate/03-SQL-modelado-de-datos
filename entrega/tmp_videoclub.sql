@@ -615,6 +615,34 @@ references copia(id_copia) on delete cascade;
 create unique index unique_dni_socio on socio(lower(dni));
 create unique index unique_direccion_socio on direccionPostal(id_socio);
 
+create unique index unique_pelicula_director_titulo on pelicula (lower(titulo), lower(director));
+
+insert into pelicula (titulo, genero, director, sinopsis)
+select distinct titulo, genero, director, sinopsis
+from tmp_videoclub tv;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
