@@ -639,19 +639,13 @@ where tv.calle is not null
 ;
 
 
+-- copia
+insert into copia (id_copia, id_pelicula)
+select distinct tv.id_copia, p.id_pelicula from tmp_videoclub tv 
+inner join pelicula p on lower(p.titulo) = lower(tv.titulo) and lower(p.director) = lower(tv.director)
+where tv.id_copia is not null;
 
-
-
-
-
-
-
-
-
-
-
-
-
+select * from copia;
 
 
 
