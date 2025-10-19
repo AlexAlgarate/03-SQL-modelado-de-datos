@@ -656,8 +656,18 @@ inner join socio s on lower(s.dni) = lower(tv.dni)
 where tv.fecha_alquiler is not null and tv.id_copia is not null
 ;
 
+-- CONSULTA
+/*
+ Para ir tirando, necesito consultar a menudo que películas estan disponibles para
+alquilar en este momento (no estan prestadas). Necesito saber el título de la película y el
+numero de copias disponibles.
+ */
 
-
-
-
-
+drop table if exists tmp_videoclub;
+select p.titulo "título", count(c.id_copia) "copias disponibles"
+from pelicula p
+join copia c on p.id_pelicula = c.id_pelicula
+left join prestamo pr on c.id_copia = pr.id_copia and pr.fecha_devolucion is null
+where pr.id_prestamo is null
+group by p.titulo
+;
