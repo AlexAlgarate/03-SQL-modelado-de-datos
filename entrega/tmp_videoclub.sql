@@ -623,9 +623,20 @@ insert into pelicula (titulo, genero, director, sinopsis)
 select distinct titulo, genero, director, sinopsis
 from tmp_videoclub tv;
 
+
 -- socio
-insert into socio (nombre, apellido_1, apellido_2, fecha_nacimiento, telefono, dni)
-select distinct nombre, apellido_1, apellido_2, to_date(fecha_nacimiento, 'YYYY-MM-DD'), telefono, dni from tmp_videoclub;
+insert into socio (nombre, apellido_1, apellido_2, fecha_nacimiento, telefono, dni )
+select distinct nombre, apellido_1, apellido_2, to_date(fecha_nacimiento, 'YYYY-MM-DD'),telefono, dni
+from tmp_videoclub;
+
+
+-- direccionPostal
+insert into direccionpostal (codigo_postal, calle, numero, piso, id_socio)
+select distinct tv.codigo_postal, tv.calle, tv.numero, tv.piso, s.id_socio
+from tmp_videoclub tv
+inner join socio s on lower(s.dni) = lower(tv.dni)
+where tv.calle is not null
+;
 
 
 
